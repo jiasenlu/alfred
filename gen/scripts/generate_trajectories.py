@@ -1,7 +1,7 @@
 import os
 import sys
-sys.path.append(os.path.join('/mnt/raid00/jiasen/alfred'))
-sys.path.append(os.path.join('/mnt/raid00/jiasen/alfred', 'gen'))
+sys.path.append(os.path.join('/home/jiasenl/code/alfred'))
+sys.path.append(os.path.join('/home/jiasenl/code/alfred', 'gen'))
 
 import time
 import multiprocessing as mp
@@ -434,7 +434,7 @@ def main(args, thread_num=0):
     print("Loaded %d known failed tuples" % len(fail_traj))
 
     # create env and agent
-    env = ThorEnv(x_display='0.%d' %(thread_num % 8))
+    env = ThorEnv(x_display='0.%d' %(thread_num % 7))
 
     game_state = TaskGameStateFullKnowledge(env)
     agent = DeterministicPlannerAgent(thread_id=0, game_state=game_state)
@@ -458,9 +458,9 @@ def main(args, thread_num=0):
 
     n_until_load_successes = args.async_load_every_n_samples
     print_successes(succ_traj)
-    # task_sampler = sample_task_params(succ_traj, full_traj, fail_traj,
-    #                                   goal_candidates, pickup_candidates, movable_candidates,
-    #                                   receptacle_candidates, scene_candidates)
+    task_sampler = sample_task_params(succ_traj, full_traj, fail_traj,
+                                      goal_candidates, pickup_candidates, movable_candidates,
+                                      receptacle_candidates, scene_candidates)
     
     # main generation loop
     # keeps trying out new task tuples as trajectories either fail or suceed
@@ -468,11 +468,11 @@ def main(args, thread_num=0):
         # if True:
         #     if True:
     # for _ in range(20):
-        for ii, json_path in enumerate(glob.iglob(os.path.join(alfred_dataset_path, "**", "traj_data.json"), recursive=True)):
-            if ii % args.num_threads == thread_num:
+        # for ii, json_path in enumerate(glob.iglob(os.path.join(alfred_dataset_path, "**", "traj_data.json"), recursive=True)):
+            # if ii % args.num_threads == thread_num:
             # if ii == 5:
-                sampled_task = json_path.split('/')[-3].split('-')
-                # sampled_task = next(task_sampler)
+                # sampled_task = json_path.split('/')[-3].split('-')
+                sampled_task = next(task_sampler)
                 # print("===============")
                 # print(ii, json_path)
                 print(sampled_task)  # DEBUG
@@ -496,7 +496,7 @@ def main(args, thread_num=0):
                 num_place_fails = 0  # count of errors related to placement failure for no valid positions.
 
                 # continue until we're (out of tries + have never succeeded) or (have gathered the target number of instances)
-                while num_place_fails > args.trials_before_fail or target_remaining > 0:
+                while tries_remaining > 0 and target_remaining > 0:
 
                     # environment setup
                     constants.pddl_goal_type = gtype
@@ -535,7 +535,7 @@ def main(args, thread_num=0):
                         if num_place_fails > 0:
                             print("Failed %d placements in the past; increased free point constraints: " % num_place_fails
                                 + str(constraint_objs))
-                        scene_info = {'scene_num': sampled_scene, 'random_seed': random.randint(0, 2 ** 32)}
+                        scene_info = {'scene_num': sampled_scene, 'random_seed': random.randint(0, 2 ** 32) % 1000000}
                         info = agent.reset(scene=scene_info,
                                         objs=constraint_objs)
 
@@ -553,7 +553,7 @@ def main(args, thread_num=0):
                         object_poses = [{'objectName': obj['name'].split('(Clone)')[0],
                                         'position': obj['position'],
                                         'rotation': obj['rotation']}
-                                        for obj in env.last_event.metadata['objects'] if obj['pickupable']]
+                                        for obj in env.last_event.metadata['objects'] if obj['pickupable'] or obj['moveable']]
                         dirty_and_empty = gtype == 'pick_clean_then_place_in_recep'
                         object_toggles = [{'objectType': o, 'stateChange': 'toggleable', 'isToggled': v}
                                         for o, v in constraint_objs['seton']]
@@ -597,6 +597,7 @@ def main(args, thread_num=0):
                                 tries_remaining -= 1
                             else:  # generic error
                                 tries_remaining -= 1
+                                # num_place_fails += 1
 
                         estr = str(e)
                         if len(estr) > 120:
@@ -742,7 +743,7 @@ if __name__ == "__main__":
 
     # params
     parser.add_argument("--repeats_per_cond", type=int, default=3)
-    parser.add_argument("--trials_before_fail", type=int, default=5)
+    parser.add_argument("--trials_before_fail", type=int, default=10)
     parser.add_argument("--async_load_every_n_samples", type=int, default=10)
     parser.add_argument('--gpu_id', type=int, default=0)
     

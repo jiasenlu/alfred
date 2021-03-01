@@ -399,6 +399,7 @@ if __name__ == '__main__':
                   'x': start_pose[0] * constants.AGENT_STEP_SIZE,
                   'y': agent_height,
                   'z': start_pose[1] * constants.AGENT_STEP_SIZE,
+                  'standing': True,
                   'rotateOnTeleport': True,
                   'rotation': start_pose[2],
                   'horizon': start_pose[3],

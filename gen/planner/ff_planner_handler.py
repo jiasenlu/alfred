@@ -199,6 +199,7 @@ class PlanParser(object):
         #self.process_pool = ThreadPool(3)
 
     def get_plan(self):
+        # get_plan_async(zip([self.domain] * 3, [self.problem_id] * 3, range(3, 6)))
         parsed_plans = self.process_pool.map(get_plan_async, zip([self.domain] * 3, [self.problem_id] * 3, range(3, 6)))
         return self.find_best_plan(parsed_plans)
 

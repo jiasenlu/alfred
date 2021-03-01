@@ -3,8 +3,9 @@ import os
 import threading
 import time
 import sys
-sys.path.append(os.path.join('/mnt/raid00/jiasen/alfred'))
-sys.path.append(os.path.join('/mnt/raid00/jiasen/alfred', 'gen'))
+sys.path.append('/home/jiasenl/code/alfred')
+sys.path.append(os.path.join('/home/jiasenl/code/alfred', 'gen'))
+
 import cv2
 import numpy as np
 
@@ -12,7 +13,7 @@ import constants
 from utils import game_util
 from env.thor_env import ThorEnv
 
-N_PROCS = 40
+N_PROCS = 35
 
 lock = threading.Lock()
 all_scene_numbers = sorted(constants.TRAIN_SCENE_NUMBERS + constants.TEST_SCENE_NUMBERS, reverse=True)
@@ -46,7 +47,8 @@ def get_obj(env, open_test_objs, reachable_points, agent_height, scene_name, goo
                           'z': point[1],
                           'rotateOnTeleport': True,
                           'rotation': rotation * 90,
-                          'horizon': horizon
+                          'horizon': horizon,
+                          'standing': True,
                           }
                 event = env.step(action)
                 if event.metadata['lastActionSuccess']:
@@ -114,7 +116,7 @@ def get_mask_of_obj(env, object_id):
 def run(thread_num):
     print(all_scene_numbers)
     # create env and agent
-    env = ThorEnv(build_path=constants.BUILD_PATH, x_display='0.%d' %(thread_num % 8), quality='Low')
+    env = ThorEnv(build_path=constants.BUILD_PATH, x_display='0.%d' %(thread_num % 7), quality='Low')
     while len(all_scene_numbers) > 0:
         lock.acquire()
         scene_num = all_scene_numbers.pop()
@@ -168,6 +170,9 @@ def run(thread_num):
                           'x': point[0],
                           'y': agent_height,
                           'z': point[1],
+                          'rotation': 0,
+                          'horizon': 0,
+                          'standing': True,
                           }
                 event = env.step(action)
                 if event.metadata['lastActionSuccess']:
@@ -178,7 +183,8 @@ def run(thread_num):
                                   'z': point[1],
                                   'rotateOnTeleport': True,
                                   'rotation': 0,
-                                  'horizon': horizon
+                                  'horizon': horizon,
+                                  'standing': True,
                                   }
                         event = env.step(action)
                         if not event.metadata['lastActionSuccess']:
@@ -206,6 +212,7 @@ def run(thread_num):
                                       'x': point[0],
                                       'y': agent_height,
                                       'z': point[1],
+                                      'standing': True,
                                       'rotateOnTeleport': True,
                                       'rotation': rotation * 90,
                                       'horizon': horizon
@@ -306,6 +313,7 @@ def run(thread_num):
                                                               'x': point[0],
                                                               'y': agent_height,
                                                               'z': point[1],
+                                                              'standing': True,
                                                               'rotateOnTeleport': True,
                                                               'rotation': rotation * 90,
                                                               'horizon': horizon

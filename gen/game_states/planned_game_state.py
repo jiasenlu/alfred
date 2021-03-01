@@ -380,6 +380,7 @@ class PlannedGameState(GameStateBase, ABC):
                        'x': nearest_point[0] * constants.AGENT_STEP_SIZE,
                        'y': self.agent_height,
                        'z': nearest_point[1] * constants.AGENT_STEP_SIZE,
+                       'standing': True,
                        'rotateOnTeleport': True,
                        'rotation': nearest_point[2] * 90,
                        'horizon': nearest_point[3]

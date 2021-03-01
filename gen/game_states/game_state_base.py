@@ -182,6 +182,7 @@ class GameStateBase(object):
                   'x': self.start_point[0] * constants.AGENT_STEP_SIZE,
                   'y': self.agent_height,
                   'z': self.start_point[1] * constants.AGENT_STEP_SIZE,
+                  'standing': True,
                   'rotateOnTeleport': True,
                   'horizon': 30,
                   'rotation': self.start_point[2] * 90,

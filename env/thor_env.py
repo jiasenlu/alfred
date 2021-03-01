@@ -133,7 +133,7 @@ class ThorEnv(Controller):
         task_type = traj['task_type']
         self.task = get_task(task_type, traj, self, args, reward_type=reward_type, max_episode_length=max_episode_length)
 
-    def step(self, action, smooth_nav=False):
+    def step(self, action, smooth_nav=False, raise_for_failure=False):
         '''
         overrides ai2thor.controller.Controller.step() for smooth navigation and goal_condition updates
         '''
@@ -276,6 +276,7 @@ class ThorEnv(Controller):
                     'x': position['x'],
                     'z': position['z'],
                     'y': position['y'],
+                    'standing': True,
                     'horizon': horizon,
                     'tempRenderChange': True,
                     'renderNormalsImage': False,
@@ -293,6 +294,7 @@ class ThorEnv(Controller):
                     'z': position['z'],
                     'y': position['y'],
                     'horizon': horizon,
+                    'standing': True,
                 }
                 event = super().step(teleport_action)
 
@@ -321,6 +323,7 @@ class ThorEnv(Controller):
                     'x': position['x'],
                     'z': position['z'],
                     'y': position['y'],
+                    'standing': True,
                     'horizon': np.round(start_horizon * (1 - xx) + end_horizon * xx, 3),
                     'tempRenderChange': True,
                     'renderNormalsImage': False,
@@ -337,6 +340,7 @@ class ThorEnv(Controller):
                     'x': position['x'],
                     'z': position['z'],
                     'y': position['y'],
+                    'standing': True,
                     'horizon': np.round(start_horizon * (1 - xx) + end_horizon * xx, 3),
                 }
                 event = super().step(teleport_action)
@@ -364,6 +368,7 @@ class ThorEnv(Controller):
             'z': position['z'],
             'y': position['y'],
             'horizon': np.round(end_horizon, 3),
+            'standing': True,
             'tempRenderChange': True,
             'renderNormalsImage': False,
             'renderImage': render_settings['renderImage'],
@@ -394,6 +399,7 @@ class ThorEnv(Controller):
             'z': position['z'],
             'y': position['y'],
             'horizon': horizon,
+            'standing': True,
             'tempRenderChange': True,
             'renderNormalsImage': False,
             'renderImage': render_settings['renderImage'],
@@ -444,8 +450,7 @@ class ThorEnv(Controller):
         elif "PutObject" in action:
             inventory_object_id = self.last_event.metadata['inventoryObjects'][0]['objectId']
             action = dict(action="PutObject",
-                          objectId=inventory_object_id,
-                          receptacleObjectId=object_id,
+                          objectId=object_id,
                           forceAction=True,
                           placeStationary=True)
             event = self.step(action)
