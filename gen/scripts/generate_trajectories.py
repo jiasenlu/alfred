@@ -1,7 +1,7 @@
 import os
 import sys
-sys.path.append(os.path.join('/home/jiasenl/code/alfred'))
-sys.path.append(os.path.join('/home/jiasenl/code/alfred', 'gen'))
+sys.path.append(os.path.join('/home/ubuntu/alfred'))
+sys.path.append(os.path.join('/home/ubuntu/alfred', 'gen'))
 
 import time
 import multiprocessing as mp
@@ -434,7 +434,7 @@ def main(args, thread_num=0):
     print("Loaded %d known failed tuples" % len(fail_traj))
 
     # create env and agent
-    env = ThorEnv(x_display='0.%d' %(thread_num % 7))
+    env = ThorEnv(x_display='0.%d' %(thread_num % 8))
 
     game_state = TaskGameStateFullKnowledge(env)
     agent = DeterministicPlannerAgent(thread_id=0, game_state=game_state)
